@@ -47,7 +47,10 @@ class DepthFaceTracker:
         depth_thread.start()
 
         # Start camera feed
-        cap = cv2.VideoCapture(0)
+        if torch.backends.mps.is_available():
+            cap = cv2.VideoCapture(1)
+        else:
+            cap = cv2.VideoCapture(0)
 
         # Initialize face mesh
         face_mesh = mp.solutions.face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1, refine_landmarks=True)
@@ -118,6 +121,7 @@ class DepthFaceTracker:
 
 if __name__ == "__main__":
     DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+    DEVICE = 'mps' if torch.backends.mps.is_avialable() else DEVICE
     model = DepthAnythingV2(encoder='vits', features=64, out_channels=[48, 96, 192, 384], max_depth=20)
     model.load_state_dict(torch.load('checkpoints/depth_anything_v2_metric_hypersim_vits.pth', map_location='cpu'))
 
